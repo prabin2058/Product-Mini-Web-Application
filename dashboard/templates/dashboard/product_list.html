@@ -21,7 +21,6 @@
             <thead class="bg-gray-50">
                 <tr>
                     <th class="text-left p-3 border">Name</th>
-                    <th class="text-left p-3 border">SKU</th>
                     <th class="text-left p-3 border">Price</th>
                     <th class="text-left p-3 border">Stock</th>
                     <th class="text-left p-3 border">Actions</th>
@@ -31,7 +30,6 @@
                 {% for product in products %}
                     <tr class="hover:bg-gray-50">
                         <td class="p-3 border">{{ product.name }}</td>
-                        <td class="p-3 border">{{ product.sku }}</td>
                         <td class="p-3 border">{{ product.price }}</td>
                         <td class="p-3 border">{{ product.stock_quantity }}</td>
                         <td class="p-3 border">
@@ -39,12 +37,15 @@
                             <span class="mx-2">|</span>
                             <a class="text-yellow-600 hover:underline" href="{% url 'dashboard:product_update' product.pk %}">Edit</a>
                             <span class="mx-2">|</span>
-                            <a class="text-red-600 hover:underline" href="{% url 'dashboard:product_delete' product.pk %}">Delete</a>
+                            <form method="post" action="{% url 'dashboard:product_delete' product.pk %}" class="inline">
+                                {% csrf_token %}
+                                <button type="submit" class="text-red-600 hover:underline" onclick="return confirm('Are you sure you want to delete this product?')">Delete</button>
+                            </form>
                         </td>
                     </tr>
                 {% empty %}
                     <tr>
-                        <td class="p-3 border" colspan="5">No products.</td>
+                        <td class="p-3 border" colspan="4">No products.</td>
                     </tr>
                 {% endfor %}
             </tbody>

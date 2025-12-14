@@ -18,7 +18,7 @@ def register_view(request):
 class CustomLoginView(LoginView):
     authentication_form = LoginForm
     template_name = "accounts/login.html"
-    success_url = reverse_lazy("dashboard:index")
+    next_page = reverse_lazy("dashboard:index")
 
 
 def logout_view(request):

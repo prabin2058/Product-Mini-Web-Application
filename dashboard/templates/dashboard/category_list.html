@@ -9,18 +9,34 @@
         <a href="{% url 'dashboard:category_create' %}" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Add</a>
     </div>
 
-    <ul class="divide-y">
-        {% for category in categories %}
-            <li class="py-3 flex items-center justify-between">
-                <div>
-                    <p class="font-medium">{{ category.name }}</p>
-                    <p class="text-sm text-gray-600">{{ category.description|default:"" }}</p>
-                </div>
-                <a class="text-red-600 hover:underline" href="{% url 'dashboard:category_delete' category.pk %}">Delete</a>
-            </li>
-        {% empty %}
-            <li class="py-3">No categories.</li>
-        {% endfor %}
-    </ul>
+    <div class="overflow-x-auto">
+        <table class="min-w-full border">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="text-left p-3 border">Name</th>
+                    <th class="text-left p-3 border">Description</th>
+                    <th class="text-left p-3 border">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for category in categories %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="p-3 border">{{ category.name }}</td>
+                        <td class="p-3 border">{{ category.description|default:"" }}</td>
+                        <td class="p-3 border">
+                            <form method="post" action="{% url 'dashboard:category_delete' category.pk %}" class="inline">
+                                {% csrf_token %}
+                                <button type="submit" class="text-red-600 hover:underline" onclick="return confirm('Delete this category?')">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td class="p-3 border" colspan="3">No categories.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
 {% endblock %}

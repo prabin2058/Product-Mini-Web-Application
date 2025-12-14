@@ -14,6 +14,7 @@ def dashboard_index(request):
     """Dashboard home page with stats"""
     user = request.user
     products = Product.objects.filter(created_by=user)
+    categories = Category.objects.all().order_by('name')
     
     # Statistics
     stats = {
@@ -24,12 +25,13 @@ def dashboard_index(request):
         'out_of_stock': products.filter(status='out_of_stock').count(),
     }
     
-    # Recent products
-    recent_products = products.order_by('-created_at')[:5]
+    # Products list for table
+    products_list = products.order_by('-created_at')
     
     context = {
         'stats': stats,
-        'recent_products': recent_products,
+        'products': products_list,
+        'categories': categories,
         'user': user,
     }
     return render(request, 'dashboard/dashboard.html', context)
@@ -52,7 +54,6 @@ def product_list(request):
         if search:
             products = products.filter(
                 Q(name__icontains=search) | 
-                Q(sku__icontains=search) |
                 Q(description__icontains=search)
             )
         if category:
@@ -161,6 +162,10 @@ def category_create(request):
 def category_delete(request, pk):
     """Delete category"""
     category = get_object_or_404(Category, pk=pk)
-    category.delete()
-    messages.success(request, 'Category deleted successfully!')
-    return redirect('dashboard:category_list')
+
+    if request.method == 'POST':
+        category.delete()
+        messages.success(request, 'Category deleted successfully!')
+        return redirect('dashboard:category_list')
+
+    return render(request, 'dashboard/category_confirm_delete.html', {'category': category})

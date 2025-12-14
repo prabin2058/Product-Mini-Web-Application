@@ -27,7 +27,6 @@ class Product(models.Model):
     
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True, null=True)
-    sku = models.CharField(max_length=50, unique=True)
     price = models.DecimalField(
         max_digits=10, 
         decimal_places=2, 
@@ -73,7 +72,7 @@ class Product(models.Model):
         ordering = ['-created_at']
     
     def __str__(self):
-        return f"{self.name} ({self.sku})"
+        return f"{self.name}"
     
     def save(self, *args, **kwargs):
         # Update status based on stock quantity

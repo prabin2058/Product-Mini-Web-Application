@@ -9,7 +9,6 @@ class ProductForm(forms.ModelForm):
         fields = [
             "name",
             "description",
-            "sku",
             "price",
             "category",
             "stock_quantity",
@@ -30,12 +29,6 @@ class ProductForm(forms.ModelForm):
                     "class": "w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent",
                     "rows": 4,
                     "placeholder": "Product description",
-                }
-            ),
-            "sku": forms.TextInput(
-                attrs={
-                    "class": "w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent",
-                    "placeholder": "SKU",
                 }
             ),
             "price": forms.NumberInput(
@@ -70,20 +63,6 @@ class ProductForm(forms.ModelForm):
                 }
             ),
         }
-
-    def clean_sku(self):
-        sku = self.cleaned_data.get("sku")
-        if not sku:
-            return sku
-
-        qs = Product.objects.filter(sku=sku)
-        if self.instance.pk:
-            qs = qs.exclude(pk=self.instance.pk)
-
-        if qs.exists():
-            raise forms.ValidationError("SKU already exists.")
-
-        return sku
 
 
 class CategoryForm(forms.ModelForm):
