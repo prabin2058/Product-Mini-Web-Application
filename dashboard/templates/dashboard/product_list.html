@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Products{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto bg-white p-6 rounded-lg shadow">
+    <div class="flex items-center justify-between mb-4">
+        <h1 class="text-2xl font-bold">Products</h1>
+        <a href="{% url 'dashboard:product_create' %}" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Add</a>
+    </div>
+
+    <form method="get" class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
+        {{ form.search }}
+        {{ form.category }}
+        {{ form.status }}
+        <button type="submit" class="px-4 py-2 bg-gray-900 text-white rounded">Search</button>
+    </form>
+
+    <div class="overflow-x-auto">
+        <table class="min-w-full border">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="text-left p-3 border">Name</th>
+                    <th class="text-left p-3 border">SKU</th>
+                    <th class="text-left p-3 border">Price</th>
+                    <th class="text-left p-3 border">Stock</th>
+                    <th class="text-left p-3 border">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in products %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="p-3 border">{{ product.name }}</td>
+                        <td class="p-3 border">{{ product.sku }}</td>
+                        <td class="p-3 border">{{ product.price }}</td>
+                        <td class="p-3 border">{{ product.stock_quantity }}</td>
+                        <td class="p-3 border">
+                            <a class="text-blue-600 hover:underline" href="{% url 'dashboard:product_detail' product.pk %}">View</a>
+                            <span class="mx-2">|</span>
+                            <a class="text-yellow-600 hover:underline" href="{% url 'dashboard:product_update' product.pk %}">Edit</a>
+                            <span class="mx-2">|</span>
+                            <a class="text-red-600 hover:underline" href="{% url 'dashboard:product_delete' product.pk %}">Delete</a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td class="p-3 border" colspan="5">No products.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

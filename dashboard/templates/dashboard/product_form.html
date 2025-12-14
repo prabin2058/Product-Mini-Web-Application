@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Product{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto bg-white p-6 rounded-lg shadow">
+    <h1 class="text-2xl font-bold mb-4">{{ title|default:"Product" }}</h1>
+
+    {% if form.errors %}
+        <div class="mb-4 p-3 rounded bg-red-50 border border-red-200 text-red-700">
+            Please correct the errors below.
+        </div>
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data" class="space-y-4">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <div class="flex gap-3">
+            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Save</button>
+            <a href="{% url 'dashboard:product_list' %}" class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

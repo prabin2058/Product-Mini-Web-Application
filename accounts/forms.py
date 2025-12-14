@@ -34,38 +34,33 @@ class RegisterForm(UserCreationForm):
         help_text="We'll never share your email with anyone else."
     )
     
-    # Customize username field
-    username = forms.CharField(
-        widget=forms.TextInput(attrs={
+    # Customize password fields
+    password1 = forms.CharField(
+        label="Password",
+        widget=forms.PasswordInput(attrs={
             "class": "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent",
-            "placeholder": "Choose a username"
+            "placeholder": "Create a password",
+            "autocomplete": "new-password",
         }),
-        help_text="Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only."
+        help_text="""
+            <ul class="text-sm text-gray-600 mt-1 space-y-1">
+                <li>• At least 8 characters</li>
+                <li>• Can't be too similar to your other personal information</li>
+                <li>• Can't be a commonly used password</li>
+                <li>• Can't be entirely numeric</li>
+            </ul>
+        """,
     )
     
-    # Customize password fields
-    # password = forms.CharField(
-    #     widget=forms.PasswordInput(attrs={
-    #         "class": "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent",
-    #         "placeholder": "Create a password"
-    #     }),
-    #     help_text="""
-    #         <ul class="text-sm text-gray-600 mt-1 space-y-1">
-    #             <li>• At least 8 characters</li>
-    #             <li>• Can't be too similar to your other personal information</li>
-    #             <li>• Can't be a commonly used password</li>
-    #             <li>• Can't be entirely numeric</li>
-    #         </ul>
-    #     """
-    # )
-    
-    # confirm password = forms.CharField(
-    #     widget=forms.PasswordInput(attrs={
-    #         "class": "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent",
-    #         "placeholder": "Confirm your password"
-    #     }),
-    #     help_text="Enter the same password as before, for verification."
-    # )
+    password2 = forms.CharField(
+        label="Confirm Password",
+        widget=forms.PasswordInput(attrs={
+            "class": "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+            "placeholder": "Confirm your password",
+            "autocomplete": "new-password",
+        }),
+        help_text="Enter the same password as before, for verification.",
+    )
     
     # Terms agreement
     terms_accepted = forms.BooleanField(
@@ -78,7 +73,7 @@ class RegisterForm(UserCreationForm):
     
     class Meta:
         model = User
-        fields = ["first_name", "last_name", "username", "email", "password1", "password2", "terms_accepted"]
+        fields = ["first_name", "last_name", "email", "password1", "password2"]
     
     def clean_email(self):
         email = self.cleaned_data.get('email')
@@ -91,6 +86,8 @@ class RegisterForm(UserCreationForm):
         user.first_name = self.cleaned_data['first_name']
         user.last_name = self.cleaned_data['last_name']
         user.email = self.cleaned_data['email']
+        if not user.username:
+            user.username = (user.email or '')[:150]
         
         if commit:
             user.save()
@@ -143,8 +140,7 @@ class LoginForm(AuthenticationForm):
                 
                 if self.user_cache is None:
                     raise ValidationError(
-                        "Please enter a correct email and password. "
-                        "Note that both fields may be case-sensitive."
+                        "Email and password doesn't match."
                     )
                 
             except User.DoesNotExist:
@@ -157,8 +153,7 @@ class LoginForm(AuthenticationForm):
                 
                 if self.user_cache is None:
                     raise ValidationError(
-                        "Please enter a correct email and password. "
-                        "Note that both fields may be case-sensitive."
+                        "Email and password doesn't match."
                     )
             
             if not self.user_cache.is_active:

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto bg-white p-6 rounded-lg shadow">
+    <h1 class="text-2xl font-bold mb-2">Dashboard</h1>
+    <p class="text-gray-600 mb-6">Welcome, {{ user.username }}.</p>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="border rounded-lg p-4">
+            <p class="text-sm text-gray-500">Total Products</p>
+            <p class="text-2xl font-semibold">{{ stats.total_products }}</p>
+        </div>
+        <div class="border rounded-lg p-4">
+            <p class="text-sm text-gray-500">In Stock</p>
+            <p class="text-2xl font-semibold">{{ stats.in_stock }}</p>
+        </div>
+        <div class="border rounded-lg p-4">
+            <p class="text-sm text-gray-500">Out of Stock</p>
+            <p class="text-2xl font-semibold">{{ stats.out_of_stock }}</p>
+        </div>
+    </div>
+
+    <div class="mt-6 flex gap-3">
+        <a href="{% url 'dashboard:product_list' %}" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">View Products</a>
+        <a href="{% url 'dashboard:product_create' %}" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">Add Product</a>
+    </div>
+</div>
+{% endblock %}
