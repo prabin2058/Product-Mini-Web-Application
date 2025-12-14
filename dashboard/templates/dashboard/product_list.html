@@ -3,10 +3,11 @@
 {% block title %}Products{% endblock %}
 
 {% block content %}
-<div class="max-w-5xl mx-auto bg-white p-6 rounded-lg shadow">
+<div class="w-full bg-white p-6 rounded-lg shadow">
     <div class="flex items-center justify-between mb-4">
         <h1 class="text-2xl font-bold">Products</h1>
-        <a href="{% url 'dashboard:product_create' %}" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Add</a>
+        <a href="{% url 'dashboard:product_create' %}"
+            class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Add</a>
     </div>
 
     <form method="get" class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
@@ -16,37 +17,79 @@
         <button type="submit" class="px-4 py-2 bg-gray-900 text-white rounded">Search</button>
     </form>
 
-    <div class="overflow-x-auto">
-        <table class="min-w-full border">
-            <thead class="bg-gray-50">
+    <div class="overflow-x-auto border border-gray-300 rounded-lg">
+        <table class="w-full table-fixed border-collapse" style="width: 100%;">
+            <colgroup>
+                <col style="width: 35%;">
+                <col style="width: 15%;">
+                <col style="width: 15%;">
+                <col style="width: 35%;">
+            </colgroup>
+            <thead class="bg-blue-600">
                 <tr>
-                    <th class="text-left p-3 border">Name</th>
-                    <th class="text-left p-3 border">Price</th>
-                    <th class="text-left p-3 border">Stock</th>
-                    <th class="text-left p-3 border">Actions</th>
+                    <th
+                        class="text-left px-5 py-3 text-xs font-semibold text-white uppercase tracking-wider border border-blue-700">
+                        Name</th>
+                    <th
+                        class="text-left px-5 py-3 text-xs font-semibold text-white uppercase tracking-wider border border-blue-700">
+                        Price</th>
+                    <th
+                        class="text-left px-5 py-3 text-xs font-semibold text-white uppercase tracking-wider border border-blue-700">
+                        Stock</th>
+                    <th
+                        class="text-left px-5 py-3 text-xs font-semibold text-white uppercase tracking-wider border border-blue-700">
+                        Actions</th>
                 </tr>
             </thead>
             <tbody>
                 {% for product in products %}
-                    <tr class="hover:bg-gray-50">
-                        <td class="p-3 border">{{ product.name }}</td>
-                        <td class="p-3 border">{{ product.price }}</td>
-                        <td class="p-3 border">{{ product.stock_quantity }}</td>
-                        <td class="p-3 border">
-                            <a class="text-blue-600 hover:underline" href="{% url 'dashboard:product_detail' product.pk %}">View</a>
-                            <span class="mx-2">|</span>
-                            <a class="text-yellow-600 hover:underline" href="{% url 'dashboard:product_update' product.pk %}">Edit</a>
-                            <span class="mx-2">|</span>
+                <tr class="hover:bg-blue-50 {% cycle 'bg-white' 'bg-gray-50' %}">
+                    <td class="px-5 py-3 border border-gray-200">{{ product.name }}</td>
+                    <td class="px-5 py-3 border border-gray-200">{{ product.price }}</td>
+                    <td class="px-5 py-3 border border-gray-200">{{ product.stock_quantity }}</td>
+                    <td class="px-5 py-3 border border-gray-200 whitespace-nowrap">
+                        <div class="flex items-center gap-6">
+                            <a class="text-blue-600 hover:underline inline-flex items-center gap-4 mr-4"
+                                href="{% url 'dashboard:product_detail' product.pk %}">
+                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" aria-hidden="true">
+                                    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7S2 12 2 12Z" />
+                                    <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
+                                </svg>
+                                View
+                            </a>
+                            <a class="text-yellow-600 hover:underline inline-flex items-center gap-1"
+                                href="{% url 'dashboard:product_update' product.pk %}">
+                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" aria-hidden="true">
+                                    <path d="M12 20h9" />
+                                    <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5Z" />
+                                </svg>
+                                Edit
+                            </a>
                             <form method="post" action="{% url 'dashboard:product_delete' product.pk %}" class="inline">
                                 {% csrf_token %}
-                                <button type="submit" class="text-red-600 hover:underline" onclick="return confirm('Are you sure you want to delete this product?')">Delete</button>
+                                <button type="submit"
+                                    class="text-red-600 hover:underline inline-flex items-center gap-1"
+                                    onclick="return confirm('Are you sure you want to delete this product?')">
+                                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" aria-hidden="true">
+                                        <path d="M3 6h18" />
+                                        <path d="M8 6V4h8v2" />
+                                        <path d="M19 6l-1 14H6L5 6" />
+                                        <path d="M10 11v6" />
+                                        <path d="M14 11v6" />
+                                    </svg>
+                                    Delete
+                                </button>
                             </form>
-                        </td>
-                    </tr>
+                        </div>
+                    </td>
+                </tr>
                 {% empty %}
-                    <tr>
-                        <td class="p-3 border" colspan="4">No products.</td>
-                    </tr>
+                <tr>
+                    <td class="px-5 py-6 border border-gray-200" colspan="4">No products.</td>
+                </tr>
                 {% endfor %}
             </tbody>
         </table>
