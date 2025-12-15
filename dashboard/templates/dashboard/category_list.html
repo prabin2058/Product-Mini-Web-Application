@@ -43,5 +43,64 @@
             </tbody>
         </table>
     </div>
+    
+    <!-- Pagination Controls -->
+    {% if categories.has_other_pages %}
+    <div class="mt-4 flex items-center justify-between">
+        <div class="text-sm text-gray-700">
+            Showing 
+            <span class="font-medium">{{ categories.start_index }}</span>
+            to 
+            <span class="font-medium">{{ categories.end_index }}</span>
+            of 
+            <span class="font-medium">{{ total_categories }}</span>
+            results
+        </div>
+        
+        <div class="flex items-center gap-2">
+            <!-- Previous -->
+            {% if categories.has_previous %}
+                <a href="?page=1"
+                   class="px-3 py-2 text-sm border border-gray-300 rounded hover:bg-gray-50">
+                    First
+                </a>
+                <a href="?page={{ categories.previous_page_number }}"
+                   class="px-3 py-2 text-sm border border-gray-300 rounded hover:bg-gray-50">
+                    Previous
+                </a>
+            {% else %}
+                <span class="px-3 py-2 text-sm text-gray-400 border border-gray-300 rounded">First</span>
+                <span class="px-3 py-2 text-sm text-gray-400 border border-gray-300 rounded">Previous</span>
+            {% endif %}
+            
+            <!-- Page Numbers -->
+            {% for num in categories.paginator.page_range %}
+                {% if categories.number == num %}
+                    <span class="px-3 py-2 text-sm bg-blue-600 text-white rounded">{{ num }}</span>
+                {% elif num > categories.number|add:'-3' and num < categories.number|add:'3' %}
+                    <a href="?page={{ num }}"
+                       class="px-3 py-2 text-sm border border-gray-300 rounded hover:bg-gray-50">
+                        {{ num }}
+                    </a>
+                {% endif %}
+            {% endfor %}
+            
+            <!-- Next -->
+            {% if categories.has_next %}
+                <a href="?page={{ categories.next_page_number }}"
+                   class="px-3 py-2 text-sm border border-gray-300 rounded hover:bg-gray-50">
+                    Next
+                </a>
+                <a href="?page={{ categories.paginator.num_pages }}"
+                   class="px-3 py-2 text-sm border border-gray-300 rounded hover:bg-gray-50">
+                    Last
+                </a>
+            {% else %}
+                <span class="px-3 py-2 text-sm text-gray-400 border border-gray-300 rounded">Next</span>
+                <span class="px-3 py-2 text-sm text-gray-400 border border-gray-300 rounded">Last</span>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

@@ -4,10 +4,12 @@ from django.contrib import messages
 from django.core.paginator import Paginator
 from django.http import HttpResponse, JsonResponse
 from django.db.models import Q, Sum, Count
+from django.utils import timezone
 import io
 
 from .models import Product, Category
 from .forms import ProductForm, CategoryForm, ProductSearchForm
+from .utils import generate_product_pdf, generate_single_product_pdf
 
 @login_required
 def dashboard_index(request):
@@ -142,7 +144,17 @@ def product_delete(request, pk):
 def category_list(request):
     """List all categories"""
     categories = Category.objects.all()
-    return render(request, 'dashboard/category_list.html', {'categories': categories})
+    
+    # Pagination
+    paginator = Paginator(categories, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'categories': page_obj,
+        'total_categories': categories.count(),
+    }
+    return render(request, 'dashboard/category_list.html', context)
 
 @login_required
 def category_create(request):
@@ -171,3 +183,53 @@ def category_delete(request, pk):
         return redirect('dashboard:category_list')
 
     return render(request, 'dashboard/category_confirm_delete.html', {'category': category})
+
+# ===== PDF EXPORT OPERATIONS =====
+
+@login_required
+def export_products_pdf(request):
+    """Export all products to PDF"""
+    user = request.user
+    products = Product.objects.filter(created_by=user)
+    
+    # Apply same filters as product_list
+    form = ProductSearchForm(request.GET or None)
+    if form.is_valid():
+        search = form.cleaned_data.get('search')
+        category = form.cleaned_data.get('category')
+        status = form.cleaned_data.get('status')
+        
+        if search:
+            products = products.filter(
+                Q(name__icontains=search) | 
+                Q(description__icontains=search)
+            )
+        if category:
+            products = products.filter(category=category)
+        if status:
+            products = products.filter(status=status)
+    
+    # Generate PDF
+    pdf_buffer = generate_product_pdf(products, "Products Report")
+    
+    # Create HTTP response
+    response = HttpResponse(pdf_buffer, content_type='application/pdf')
+    filename = f"products_report_{timezone.now().strftime('%Y%m%d_%H%M%S')}.pdf"
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    
+    return response
+
+@login_required
+def export_product_pdf(request, pk):
+    """Export single product to PDF"""
+    product = get_object_or_404(Product, pk=pk, created_by=request.user)
+    
+    # Generate PDF
+    pdf_buffer = generate_single_product_pdf(product)
+    
+    # Create HTTP response
+    response = HttpResponse(pdf_buffer, content_type='application/pdf')
+    filename = f"product_{product.id}_{product.name.replace(' ', '_')}_{timezone.now().strftime('%Y%m%d_%H%M%S')}.pdf"
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    
+    return response

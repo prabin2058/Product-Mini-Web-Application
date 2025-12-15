@@ -12,6 +12,8 @@ urlpatterns = [
     path("products/<int:pk>/", views.product_detail, name="product_detail"),
     path("products/<int:pk>/update/", views.product_update, name="product_update"),
     path("products/<int:pk>/delete/", views.product_delete, name="product_delete"),
+    path("products/<int:pk>/pdf/", views.export_product_pdf, name="export_product_pdf"),
+    path("products/pdf/", views.export_products_pdf, name="export_products_pdf"),
 
     path("categories/", views.category_list, name="category_list"),
     path("categories/create/", views.category_create, name="category_create"),

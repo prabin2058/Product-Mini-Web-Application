@@ -126,16 +126,6 @@ Product List features:
 - Category list: `/dashboard/categories/`
 - Add category: `/dashboard/categories/create/`
 
-## Notes / Remaining Work (for assignment)
 
-The assignment also asks for **PDF generation/export** from database data.
 
-- A PDF export endpoint/button is not yet included.
-- Suggested libraries: `ReportLab` (easy) or `WeasyPrint` (HTML-to-PDF).
 
-## Submission Checklist
-
-- Push project to GitHub
-- Add screenshots (optional)
-- Ensure `README.md` includes setup/run steps (this file)
-- (Recommended) Add `requirements.txt` for easy installation
