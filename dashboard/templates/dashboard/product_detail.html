@@ -9,6 +9,12 @@
         <a href="{% url 'dashboard:product_list' %}" class="text-blue-600 hover:underline">Back</a>
     </div>
 
+    {% if product.image %}
+        <div class="mb-4">
+            <img src="{{ product.image.url }}" alt="{{ product.name }}" class="w-full max-w-md rounded-lg border border-gray-200" />
+        </div>
+    {% endif %}
+
     <div class="space-y-2">
         <p><span class="font-medium">Price:</span> {{ product.price }}</p>
         <p><span class="font-medium">Stock:</span> {{ product.stock_quantity }}</p>

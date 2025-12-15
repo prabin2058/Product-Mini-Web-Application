@@ -153,6 +153,8 @@ def category_create(request):
             form.save()
             messages.success(request, 'Category created successfully!')
             return redirect('dashboard:category_list')
+        else:
+            messages.error(request, 'Please correct the errors below.')
     else:
         form = CategoryForm()
     
