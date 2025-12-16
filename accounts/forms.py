@@ -4,7 +4,22 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django.core.exceptions import ValidationError
 
+ROLE_CHOICES = [
+    ('user', 'User'),
+    ('admin', 'Admin'),
+]
+
 class RegisterForm(UserCreationForm):
+    # Role selection field
+    role = forms.ChoiceField(
+        choices=ROLE_CHOICES,
+        required=True,
+        widget=forms.Select(attrs={
+            "class": "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        }),
+        label="Register as"
+    )
+    
     # Add first_name and last_name fields
     first_name = forms.CharField(
         max_length=30,
@@ -73,7 +88,7 @@ class RegisterForm(UserCreationForm):
     
     class Meta:
         model = User
-        fields = ["first_name", "last_name", "email", "password1", "password2"]
+        fields = ["role", "first_name", "last_name", "email", "password1", "password2"]
     
     def clean_email(self):
         email = self.cleaned_data.get('email')
@@ -88,6 +103,13 @@ class RegisterForm(UserCreationForm):
         user.email = self.cleaned_data['email']
         if not user.username:
             user.username = (user.email or '')[:150]
+        
+        # Set is_staff based on role selection
+        role = self.cleaned_data.get('role')
+        if role == 'admin':
+            user.is_staff = True
+        else:
+            user.is_staff = False
         
         if commit:
             user.save()

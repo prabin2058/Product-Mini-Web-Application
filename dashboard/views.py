@@ -5,17 +5,30 @@ from django.core.paginator import Paginator
 from django.http import HttpResponse, JsonResponse
 from django.db.models import Q, Sum, Count
 from django.utils import timezone
+from django.core.exceptions import PermissionDenied
+from functools import wraps
 import io
 
 from .models import Product, Category
 from .forms import ProductForm, CategoryForm, ProductSearchForm
 from .utils import generate_product_pdf, generate_single_product_pdf
 
+
+def admin_required(view_func):
+    """Decorator to restrict access to admin users only"""
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        if not request.user.is_staff:
+            raise PermissionDenied("You don't have permission to perform this action.")
+        return view_func(request, *args, **kwargs)
+    return wrapper
+
+
 @login_required
 def dashboard_index(request):
     """Dashboard home page with stats"""
-    user = request.user
-    products = Product.objects.filter(created_by=user)
+    # Show all products for all users (global view)
+    products = Product.objects.all()
     categories = Category.objects.all().order_by('name')
     
     # Statistics
@@ -27,14 +40,22 @@ def dashboard_index(request):
         'out_of_stock': products.filter(status='out_of_stock').count(),
     }
     
-    # Products list for table
+    # Products pagination
     products_list = products.order_by('-created_at')
+    products_paginator = Paginator(products_list, 5)
+    products_page_number = request.GET.get('products_page', 1)
+    products_page_obj = products_paginator.get_page(products_page_number)
+    
+    # Categories pagination
+    categories_paginator = Paginator(categories, 5)
+    categories_page_number = request.GET.get('categories_page', 1)
+    categories_page_obj = categories_paginator.get_page(categories_page_number)
     
     context = {
         'stats': stats,
-        'products': products_list,
-        'categories': categories,
-        'user': user,
+        'products': products_page_obj,
+        'categories': categories_page_obj,
+        'user': request.user,
     }
     return render(request, 'dashboard/dashboard.html', context)
 
@@ -43,8 +64,8 @@ def dashboard_index(request):
 @login_required
 def product_list(request):
     """List all products"""
-    user = request.user
-    products = Product.objects.filter(created_by=user)
+    # Show all products for all users (global view)
+    products = Product.objects.all()
     
     # Search and filter
     form = ProductSearchForm(request.GET or None)
@@ -76,6 +97,7 @@ def product_list(request):
     return render(request, 'dashboard/product_list.html', context)
 
 @login_required
+@admin_required
 def product_create(request):
     """Create new product"""
     if request.method == 'POST':
@@ -100,13 +122,15 @@ def product_create(request):
 @login_required
 def product_detail(request, pk):
     """View product details"""
-    product = get_object_or_404(Product, pk=pk, created_by=request.user)
+    # All users can view any product
+    product = get_object_or_404(Product, pk=pk)
     return render(request, 'dashboard/product_detail.html', {'product': product})
 
 @login_required
+@admin_required
 def product_update(request, pk):
     """Update existing product"""
-    product = get_object_or_404(Product, pk=pk, created_by=request.user)
+    product = get_object_or_404(Product, pk=pk)
     
     if request.method == 'POST':
         form = ProductForm(request.POST, request.FILES, instance=product)
@@ -127,9 +151,10 @@ def product_update(request, pk):
     return render(request, 'dashboard/product_form.html', context)
 
 @login_required
+@admin_required
 def product_delete(request, pk):
     """Delete product"""
-    product = get_object_or_404(Product, pk=pk, created_by=request.user)
+    product = get_object_or_404(Product, pk=pk)
     
     if request.method == 'POST':
         product.delete()
@@ -157,6 +182,7 @@ def category_list(request):
     return render(request, 'dashboard/category_list.html', context)
 
 @login_required
+@admin_required
 def category_create(request):
     """Create new category"""
     if request.method == 'POST':
@@ -173,6 +199,7 @@ def category_create(request):
     return render(request, 'dashboard/category_form.html', {'form': form})
 
 @login_required
+@admin_required
 def category_delete(request, pk):
     """Delete category"""
     category = get_object_or_404(Category, pk=pk)
@@ -189,8 +216,8 @@ def category_delete(request, pk):
 @login_required
 def export_products_pdf(request):
     """Export all products to PDF"""
-    user = request.user
-    products = Product.objects.filter(created_by=user)
+    # Export all products (global view)
+    products = Product.objects.all()
     
     # Apply same filters as product_list
     form = ProductSearchForm(request.GET or None)

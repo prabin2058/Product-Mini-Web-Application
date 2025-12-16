@@ -9,15 +9,18 @@
         <div class="flex gap-2">
             <a href="{% url 'dashboard:export_products_pdf' %}?{{ request.GET.urlencode }}"
                 class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 inline-flex items-center gap-2">
-                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                    <polyline points="7 10 12 15 17 10"/>
-                    <line x1="12" y1="15" x2="12" y2="3"/>
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    aria-hidden="true">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="7 10 12 15 17 10" />
+                    <line x1="12" y1="15" x2="12" y2="3" />
                 </svg>
                 Export PDF
             </a>
+            {% if user.is_staff %}
             <a href="{% url 'dashboard:product_create' %}"
                 class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Add</a>
+            {% endif %}
         </div>
     </div>
 
@@ -69,6 +72,7 @@
                                 </svg>
                                 View
                             </a>
+                            {% if user.is_staff %}
                             <a class="text-yellow-600 hover:underline inline-flex items-center gap-1"
                                 href="{% url 'dashboard:product_update' product.pk %}">
                                 <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -94,6 +98,7 @@
                                     Delete
                                 </button>
                             </form>
+                            {% endif %}
                         </div>
                     </td>
                 </tr>
@@ -110,57 +115,57 @@
     {% if products.paginator.num_pages > 1 %}
     <div class="mt-4 flex items-center justify-between">
         <div class="text-sm text-gray-700">
-            Showing 
+            Showing
             <span class="font-medium">{{ products.start_index }}</span>
-            to 
+            to
             <span class="font-medium">{{ products.end_index }}</span>
-            of 
+            of
             <span class="font-medium">{{ total_products }}</span>
             results
         </div>
-        
+
         <div class="flex items-center gap-2">
             <!-- Previous -->
             {% if products.has_previous %}
-                <a href="?page=1{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}"
-                   class="px-3 py-2 text-sm border border-gray-300 rounded hover:bg-gray-50">
-                    First
-                </a>
-                <a href="?page={{ products.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}"
-                   class="px-3 py-2 text-sm border border-gray-300 rounded hover:bg-gray-50">
-                    Previous
-                </a>
+            <a href="?page=1{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}"
+                class="px-3 py-2 text-sm border border-gray-300 rounded hover:bg-gray-50">
+                First
+            </a>
+            <a href="?page={{ products.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}"
+                class="px-3 py-2 text-sm border border-gray-300 rounded hover:bg-gray-50">
+                Previous
+            </a>
             {% else %}
-                <span class="px-3 py-2 text-sm text-gray-400 border border-gray-300 rounded">First</span>
-                <span class="px-3 py-2 text-sm text-gray-400 border border-gray-300 rounded">Previous</span>
+            <span class="px-3 py-2 text-sm text-gray-400 border border-gray-300 rounded">First</span>
+            <span class="px-3 py-2 text-sm text-gray-400 border border-gray-300 rounded">Previous</span>
             {% endif %}
-            
+
             <!-- Page Numbers -->
             {% for num in products.paginator.page_range %}
-                {% if products.number == num %}
-                    <span class="px-3 py-2 text-sm bg-blue-600 text-white rounded">{{ num }}</span>
-                {% elif num > products.number|add:'-3' and num < products.number|add:'3' %}
-                    <a href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}"
-                       class="px-3 py-2 text-sm border border-gray-300 rounded hover:bg-gray-50">
-                        {{ num }}
-                    </a>
+            {% if products.number == num %}
+            <span class="px-3 py-2 text-sm bg-blue-600 text-white rounded">{{ num }}</span>
+            {% elif num > products.number|add:'-3' and num < products.number|add:'3' %} <a
+                href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}"
+                class="px-3 py-2 text-sm border border-gray-300 rounded hover:bg-gray-50">
+                {{ num }}
+                </a>
                 {% endif %}
-            {% endfor %}
-            
-            <!-- Next -->
-            {% if products.has_next %}
+                {% endfor %}
+
+                <!-- Next -->
+                {% if products.has_next %}
                 <a href="?page={{ products.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}"
-                   class="px-3 py-2 text-sm border border-gray-300 rounded hover:bg-gray-50">
+                    class="px-3 py-2 text-sm border border-gray-300 rounded hover:bg-gray-50">
                     Next
                 </a>
                 <a href="?page={{ products.paginator.num_pages }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}"
-                   class="px-3 py-2 text-sm border border-gray-300 rounded hover:bg-gray-50">
+                    class="px-3 py-2 text-sm border border-gray-300 rounded hover:bg-gray-50">
                     Last
                 </a>
-            {% else %}
+                {% else %}
                 <span class="px-3 py-2 text-sm text-gray-400 border border-gray-300 rounded">Next</span>
                 <span class="px-3 py-2 text-sm text-gray-400 border border-gray-300 rounded">Last</span>
-            {% endif %}
+                {% endif %}
         </div>
     </div>
     {% endif %}

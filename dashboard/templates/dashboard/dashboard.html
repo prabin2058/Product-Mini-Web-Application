@@ -8,15 +8,18 @@
     <p class="text-gray-600 mb-6">Welcome, {{ user.username }}.</p>
 
     <div class="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        <div class="rounded-lg p-8 min-h-32 bg-green-600 text-white shadow flex flex-col items-center justify-center text-center">
+        <div
+            class="rounded-lg p-8 min-h-32 bg-green-600 text-white shadow flex flex-col items-center justify-center text-center">
             <p class="text-lg text-white/80">Total Products</p>
             <p class="text-3xl font-semibold mt-1">{{ stats.total_products }}</p>
         </div>
-        <div class="rounded-lg p-8 min-h-32 bg-blue-600 text-white shadow flex flex-col items-center justify-center text-center">
+        <div
+            class="rounded-lg p-8 min-h-32 bg-blue-600 text-white shadow flex flex-col items-center justify-center text-center">
             <p class="text-lg text-white/80">In Stock</p>
             <p class="text-3xl font-semibold mt-1">{{ stats.in_stock }}</p>
         </div>
-        <div class="rounded-lg p-8 min-h-32 bg-blue-600 text-white shadow flex flex-col items-center justify-center text-center">
+        <div
+            class="rounded-lg p-8 min-h-32 bg-blue-600 text-white shadow flex flex-col items-center justify-center text-center">
             <p class="text-lg text-white/80">Out of Stock</p>
             <p class="text-3xl font-semibold mt-1">{{ stats.out_of_stock }}</p>
         </div>
@@ -25,10 +28,12 @@
     <div class="mt-6 flex gap-3">
         <a href="{% url 'dashboard:product_list' %}"
             class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">View Products</a>
+        {% if user.is_staff %}
         <a href="{% url 'dashboard:product_create' %}"
             class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">Add Product</a>
         <a href="{% url 'dashboard:category_create' %}"
             class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Add Category</a>
+        {% endif %}
     </div>
 
     <div class="mt-8">
@@ -37,10 +42,16 @@
         <div class="overflow-x-auto border border-gray-300 rounded-lg">
             <table class="w-full table-fixed border-collapse" style="width: 100%;">
                 <colgroup>
+                    {% if user.is_staff %}
                     <col style="width: 35%;">
                     <col style="width: 15%;">
                     <col style="width: 15%;">
                     <col style="width: 35%;">
+                    {% else %}
+                    <col style="width: 40%;">
+                    <col style="width: 30%;">
+                    <col style="width: 30%;">
+                    {% endif %}
                 </colgroup>
                 <thead class="bg-blue-600">
                     <tr>
@@ -53,9 +64,11 @@
                         <th
                             class="px-5 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider border border-blue-700">
                             Stock</th>
+                        {% if user.is_staff %}
                         <th
                             class="px-5 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider border border-blue-700">
                             Actions</th>
+                        {% endif %}
                     </tr>
                 </thead>
                 <tbody class="bg-white">
@@ -64,6 +77,7 @@
                         <td class="px-5 py-3 font-medium text-gray-900 border border-gray-200">{{ product.name }}</td>
                         <td class="px-5 py-3 text-gray-700 border border-gray-200">{{ product.price }}</td>
                         <td class="px-5 py-3 text-gray-700 border border-gray-200">{{ product.stock_quantity }}</td>
+                        {% if user.is_staff %}
                         <td class="px-5 py-3 border border-gray-200 whitespace-normal">
                             <div class="flex flex-wrap items-center gap-2">
                                 <a class="text-blue-600 hover:underline"
@@ -80,8 +94,7 @@
                                 <form method="post" action="{% url 'dashboard:product_delete' product.pk %}"
                                     class="inline">
                                     {% csrf_token %}
-                                    <button type="submit"
-                                        class="text-red-600 hover:underline"
+                                    <button type="submit" class="text-red-600 hover:underline"
                                         onclick="return confirm('Are you sure you want to delete this product?')">
                                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                             stroke-width="2" aria-hidden="true">
@@ -92,21 +105,81 @@
                                             <path d="M14 11v6" />
                                         </svg>
                                         Delete
-
                                     </button>
                                 </form>
                             </div>
                         </td>
+                        {% endif %}
                     </tr>
                     {% empty %}
 
                     <tr>
-                        <td class="px-5 py-6 text-gray-600 border border-gray-200" colspan="4">No products.</td>
+                        <td class="px-5 py-6 text-gray-600 border border-gray-200"
+                            colspan="{% if user.is_staff %}4{% else %}3{% endif %}">No products.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
+
+        <!-- Products Pagination -->
+        {% if products.has_other_pages %}
+        <div class="mt-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div class="text-sm text-gray-700">
+                Showing
+                <span class="font-medium">{{ products.start_index }}</span>
+                to
+                <span class="font-medium">{{ products.end_index }}</span>
+                of
+                <span class="font-medium">{{ products.paginator.count }}</span>
+                products
+            </div>
+
+            <div class="flex items-center gap-1">
+                <!-- Previous -->
+                {% if products.has_previous %}
+                <a href="?products_page=1{% if request.GET.categories_page %}&categories_page={{ request.GET.categories_page }}{% endif %}"
+                    class="px-3 py-2 text-sm border border-gray-300 rounded hover:bg-gray-100">
+                    &laquo;
+                </a>
+                <a href="?products_page={{ products.previous_page_number }}{% if request.GET.categories_page %}&categories_page={{ request.GET.categories_page }}{% endif %}"
+                    class="px-3 py-2 text-sm border border-gray-300 rounded hover:bg-gray-100">
+                    &lsaquo;
+                </a>
+                {% else %}
+                <span class="px-3 py-2 text-sm text-gray-400 border border-gray-200 rounded">&laquo;</span>
+                <span class="px-3 py-2 text-sm text-gray-400 border border-gray-200 rounded">&lsaquo;</span>
+                {% endif %}
+
+                <!-- Page Numbers -->
+                {% for num in products.paginator.page_range %}
+                {% if products.number == num %}
+                <span class="px-3 py-2 text-sm bg-blue-600 text-white rounded">{{ num }}</span>
+                {% elif num > products.number|add:'-3' and num < products.number|add:'3' %} <a
+                    href="?products_page={{ num }}{% if request.GET.categories_page %}&categories_page={{ request.GET.categories_page }}{% endif %}"
+                    class="px-3 py-2 text-sm border border-gray-300 rounded hover:bg-gray-100">
+                    {{ num }}
+                    </a>
+                    {% endif %}
+                    {% endfor %}
+
+                    <!-- Next -->
+                    {% if products.has_next %}
+                    <a href="?products_page={{ products.next_page_number }}{% if request.GET.categories_page %}&categories_page={{ request.GET.categories_page }}{% endif %}"
+                        class="px-3 py-2 text-sm border border-gray-300 rounded hover:bg-gray-100">
+                        &rsaquo;
+                    </a>
+                    <a href="?products_page={{ products.paginator.num_pages }}{% if request.GET.categories_page %}&categories_page={{ request.GET.categories_page }}{% endif %}"
+                        class="px-3 py-2 text-sm border border-gray-300 rounded hover:bg-gray-100">
+                        &raquo;
+                    </a>
+                    {% else %}
+                    <span class="px-3 py-2 text-sm text-gray-400 border border-gray-200 rounded">&rsaquo;</span>
+                    <span class="px-3 py-2 text-sm text-gray-400 border border-gray-200 rounded">&raquo;</span>
+                    {% endif %}
+            </div>
+        </div>
+        {% endif %}
     </div>
 
     <div class="mt-10">
@@ -115,9 +188,14 @@
         <div class="overflow-x-auto border border-gray-300 rounded-lg">
             <table class="w-full table-fixed border-collapse" style="width: 100%;">
                 <colgroup>
+                    {% if user.is_staff %}
                     <col style="width: 25%;">
                     <col style="width: 55%;">
                     <col style="width: 20%;">
+                    {% else %}
+                    <col style="width: 30%;">
+                    <col style="width: 70%;">
+                    {% endif %}
                 </colgroup>
                 <thead class="bg-blue-600">
                     <tr>
@@ -127,9 +205,11 @@
                         <th
                             class="px-5 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider border border-blue-700">
                             Description</th>
+                        {% if user.is_staff %}
                         <th
                             class="px-5 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider border border-blue-700">
                             Actions</th>
+                        {% endif %}
                     </tr>
                 </thead>
                 <tbody class="bg-white">
@@ -138,6 +218,7 @@
                         <td class="px-5 py-3 font-medium text-gray-900 border border-gray-200">{{ category.name }}</td>
                         <td class="px-5 py-3 text-gray-700 border border-gray-200">{{ category.description|default:"" }}
                         </td>
+                        {% if user.is_staff %}
                         <td class="px-5 py-3 border border-gray-200 whitespace-nowrap">
                             <form method="post" action="{% url 'dashboard:category_delete' category.pk %}"
                                 class="inline">
@@ -146,16 +227,77 @@
                                     onclick="return confirm('Delete this category?')">Delete</button>
                             </form>
                         </td>
+                        {% endif %}
                     </tr>
                     {% empty %}
 
                     <tr>
-                        <td class="px-5 py-6 text-gray-600 border border-gray-200" colspan="3">No categories.</td>
+                        <td class="px-5 py-6 text-gray-600 border border-gray-200"
+                            colspan="{% if user.is_staff %}3{% else %}2{% endif %}">No categories.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
+
+        <!-- Categories Pagination -->
+        {% if categories.has_other_pages %}
+        <div class="mt-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div class="text-sm text-gray-700">
+                Showing
+                <span class="font-medium">{{ categories.start_index }}</span>
+                to
+                <span class="font-medium">{{ categories.end_index }}</span>
+                of
+                <span class="font-medium">{{ categories.paginator.count }}</span>
+                categories
+            </div>
+
+            <div class="flex items-center gap-1">
+                <!-- Previous -->
+                {% if categories.has_previous %}
+                <a href="?categories_page=1{% if request.GET.products_page %}&products_page={{ request.GET.products_page }}{% endif %}"
+                    class="px-3 py-2 text-sm border border-gray-300 rounded hover:bg-gray-100">
+                    &laquo;
+                </a>
+                <a href="?categories_page={{ categories.previous_page_number }}{% if request.GET.products_page %}&products_page={{ request.GET.products_page }}{% endif %}"
+                    class="px-3 py-2 text-sm border border-gray-300 rounded hover:bg-gray-100">
+                    &lsaquo;
+                </a>
+                {% else %}
+                <span class="px-3 py-2 text-sm text-gray-400 border border-gray-200 rounded">&laquo;</span>
+                <span class="px-3 py-2 text-sm text-gray-400 border border-gray-200 rounded">&lsaquo;</span>
+                {% endif %}
+
+                <!-- Page Numbers -->
+                {% for num in categories.paginator.page_range %}
+                {% if categories.number == num %}
+                <span class="px-3 py-2 text-sm bg-blue-600 text-white rounded">{{ num }}</span>
+                {% elif num > categories.number|add:'-3' and num < categories.number|add:'3' %} <a
+                    href="?categories_page={{ num }}{% if request.GET.products_page %}&products_page={{ request.GET.products_page }}{% endif %}"
+                    class="px-3 py-2 text-sm border border-gray-300 rounded hover:bg-gray-100">
+                    {{ num }}
+                    </a>
+                    {% endif %}
+                    {% endfor %}
+
+                    <!-- Next -->
+                    {% if categories.has_next %}
+                    <a href="?categories_page={{ categories.next_page_number }}{% if request.GET.products_page %}&products_page={{ request.GET.products_page }}{% endif %}"
+                        class="px-3 py-2 text-sm border border-gray-300 rounded hover:bg-gray-100">
+                        &rsaquo;
+                    </a>
+                    <a href="?categories_page={{ categories.paginator.num_pages }}{% if request.GET.products_page %}&products_page={{ request.GET.products_page }}{% endif %}"
+                        class="px-3 py-2 text-sm border border-gray-300 rounded hover:bg-gray-100">
+                        &raquo;
+                    </a>
+                    {% else %}
+                    <span class="px-3 py-2 text-sm text-gray-400 border border-gray-200 rounded">&rsaquo;</span>
+                    <span class="px-3 py-2 text-sm text-gray-400 border border-gray-200 rounded">&raquo;</span>
+                    {% endif %}
+            </div>
+        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
