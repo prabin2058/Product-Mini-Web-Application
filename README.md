@@ -1,131 +1,232 @@
-# Product Mini Web Application (Django)
+# Product Mini Web Application
 
-A mini Django web application demonstrating:
+A comprehensive Django web application demonstrating authentication, database operations, CRUD functionality, role-based access control, PDF generation, and a modern UI.
 
-- User authentication (register, login, logout)
-- CRUD operations for Products (and basic Category management)
-- Search/filtering and pagination for products
-- TailwindCSS-based UI (via `django-tailwind` + `theme` app)
+## ✅ Features Implemented
 
-## Tech Stack
+### Core Requirements
 
-- Backend: Django
-- Database: SQLite
-- Frontend: Django Templates + TailwindCSS
+| Feature | Status | Description |
+|---------|--------|-------------|
+| **User Signup** | ✅ Complete | Registration with email, password, and role selection |
+| **User Login** | ✅ Complete | Email-based authentication with session management |
+| **Secure Password Hashing** | ✅ Complete | Django's built-in PBKDF2 password hasher |
+| **Session-based Authentication** | ✅ Complete | Django sessions with login_required decorator |
+| **Logout Functionality** | ✅ Complete | Secure session termination |
+| **CRUD Operations** | ✅ Complete | Full Create, Read, Update, Delete for Products and Categories |
+| **SQLite Database** | ✅ Complete | With proper Django ORM models |
+| **Database Migrations** | ✅ Complete | Django migrations for all models |
+| **Form for Data Submission** | ✅ Complete | Django Forms with validation |
+| **Table View for Records** | ✅ Complete | Styled tables with Tailwind CSS |
+| **Basic Validation** | ✅ Complete | Form validation with error messages |
+| **Clean, Simple Layout** | ✅ Complete | Modern UI with Tailwind CSS |
+| **PDF Generation (Single Record)** | ✅ Complete | Download PDF for individual product |
+| **PDF Generation (Full Table)** | ✅ Complete | Download PDF report for all products |
 
-## Project Structure
+### Bonus Features
 
-- `products/` Django project settings
-- `accounts/` authentication (register/login/logout)
-- `dashboard/` products & categories (CRUD)
-- `theme/` Tailwind build pipeline and base template
+| Feature | Status | Description |
+|---------|--------|-------------|
+| **Search & Filtering** | ✅ Complete | Search by name/description, filter by category/status |
+| **Pagination** | ✅ Complete | Page numbers with navigation controls |
+| **Role-Based Access (Admin/User)** | ✅ Complete | Admins have full CRUD, Users have read-only access |
 
-## Setup (Windows)
+## 🛠 Tech Stack
 
-### 1) Prerequisites
+| Component | Technology |
+|-----------|------------|
+| **Backend** | Django 5.0+ |
+| **Database** | SQLite |
+| **Frontend** | Django Templates + Tailwind CSS |
+| **PDF Generation** | ReportLab |
+| **Authentication** | Django built-in auth system |
+| **Form Handling** | Django Forms + django-widget-tweaks |
 
-- Python 3.10+ (recommended)
-- Node.js + npm (required for Tailwind build)
+## 📁 Project Structure
 
-### 2) Create and activate a virtual environment
+```
+Product/
+├── products/           # Django project settings
+│   ├── settings.py     # Main settings file
+│   ├── urls.py         # Root URL configuration
+│   └── wsgi.py         # WSGI application
+├── accounts/           # Authentication app
+│   ├── forms.py        # Register and Login forms
+│   ├── views.py        # Auth views (register, login, logout)
+│   └── templates/      # Login and Register templates
+├── dashboard/          # Main application
+│   ├── models.py       # Product and Category models
+│   ├── views.py        # CRUD views + PDF export
+│   ├── forms.py        # Product and Category forms
+│   ├── utils.py        # PDF generation utilities
+│   └── templates/      # Dashboard templates
+├── theme/              # Tailwind CSS configuration
+│   ├── templates/      # Base template
+│   └── static_src/     # Tailwind source files
+├── db.sqlite3          # SQLite database
+├── requirements.txt    # Python dependencies
+└── README.md           # This file
+```
 
-From the project root (where `manage.py` exists):
+## 🚀 Setup Instructions
+
+### Prerequisites
+
+- Python 3.10 or higher
+- Node.js + npm (for Tailwind CSS build)
+
+### Step 1: Clone the Repository
+
+```bash
+git clone <repository-url>
+cd Product
+```
+
+### Step 2: Create Virtual Environment
 
 ```powershell
+# Windows
 python -m venv venv
 .\venv\Scripts\Activate.ps1
+
+# Linux/Mac
+python3 -m venv venv
+source venv/bin/activate
 ```
 
-If PowerShell blocks activation, run PowerShell as Admin once:
+> **Note**: If PowerShell blocks activation, run as Admin:
+> ```powershell
+> Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+> ```
 
-```powershell
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
-```
+### Step 3: Install Python Dependencies
 
-### 3) Install Python dependencies
-
-If you have a `requirements.txt`, use:
-
-```powershell
+```bash
 pip install -r requirements.txt
 ```
 
-If you do not have a `requirements.txt` yet, install the core dependencies:
+### Step 4: Run Database Migrations
 
-```powershell
-pip install django django-tailwind django-widget-tweaks
-```
-
-### 4) Run migrations
-
-```powershell
+```bash
 python manage.py migrate
 ```
 
-(Optional) Create an admin user:
+### Step 5: Build Tailwind CSS
 
-```powershell
-python manage.py createsuperuser
-```
+Navigate to the theme static source directory:
 
-### 5) Build TailwindCSS (required for styling)
-
-Install Node packages:
-
-```powershell
+```bash
+cd theme/static_src
 npm install
-```
-
-Run Tailwind in watch mode (recommended during development):
-
-```powershell
 npm run dev
 ```
 
-Note: Run the above commands inside:
+### Step 6: Start the Development Server
 
-- `theme/static_src/`
+In a new terminal (from project root):
 
-### 6) Start the Django development server
-
-In another terminal (project root):
-
-```powershell
+```bash
 python manage.py runserver
 ```
 
-Open:
+Open your browser and navigate to: **http://127.0.0.1:8000/**
 
-- `http://127.0.0.1:8000/accounts/login/`
-
-## How to Use
+## 📖 Usage Guide
 
 ### Authentication
 
-- Register: `/accounts/register/`
-- Login: `/accounts/login/`
-- Logout: `/accounts/logout/`
+| Action | URL | Description |
+|--------|-----|-------------|
+| Register | `/accounts/register/` | Create new account with role selection (User/Admin) |
+| Login | `/accounts/login/` | Login with email and password |
+| Logout | `/accounts/logout/` | End current session |
+
+### Role-Based Access
+
+| Role | Permissions |
+|------|-------------|
+| **Admin** (`is_staff=True`) | Full CRUD access - can create, view, edit, delete products and categories |
+| **User** (`is_staff=False`) | Read-only access - can only view products and categories, export PDFs |
 
 ### Dashboard & Products
 
-After login you can access:
-
-- Dashboard: `/dashboard/`
-- Product list: `/dashboard/products/`
-- Add product: `/dashboard/products/create/`
-
-Product List features:
-
-- Search (name/description)
-- Filter by category
-- Filter by status
-- Pagination (10 per page)
+| Feature | URL | Admin | User |
+|---------|-----|-------|------|
+| Dashboard | `/dashboard/` | ✅ Full access | ✅ View only |
+| Product List | `/dashboard/products/` | ✅ Full CRUD | ✅ View only |
+| Create Product | `/dashboard/products/create/` | ✅ | ❌ |
+| View Product | `/dashboard/products/<id>/` | ✅ | ✅ |
+| Edit Product | `/dashboard/products/<id>/update/` | ✅ | ❌ |
+| Delete Product | `/dashboard/products/<id>/delete/` | ✅ | ❌ |
 
 ### Categories
 
-- Category list: `/dashboard/categories/`
-- Add category: `/dashboard/categories/create/`
+| Feature | URL | Admin | User |
+|---------|-----|-------|------|
+| Category List | `/dashboard/categories/` | ✅ Full CRUD | ✅ View only |
+| Create Category | `/dashboard/categories/create/` | ✅ | ❌ |
+| Delete Category | `/dashboard/categories/<id>/delete/` | ✅ | ❌ |
 
+### PDF Export
 
+| Feature | URL | Description |
+|---------|-----|-------------|
+| Export All Products | `/dashboard/products/pdf/` | Download PDF report of all products |
+| Export Single Product | `/dashboard/products/<id>/pdf/` | Download detailed PDF for one product |
 
+### Search & Filtering
 
+On the Product List page (`/dashboard/products/`):
+- **Search**: Filter by product name or description
+- **Category Filter**: Filter by product category
+- **Status Filter**: Filter by stock status (In Stock, Low Stock, Out of Stock)
+
+## 📸 Screenshots
+
+### Dashboard (Admin View)
+- Stats cards showing Total Products, In Stock, Out of Stock
+- Products table with View, Edit, Delete actions
+- Categories table with Delete action
+
+### Dashboard (User View)
+- Same stats cards
+- Products table without Actions column
+- Categories table without Actions column
+
+### Registration
+- Role selection dropdown (User/Admin)
+- First name, Last name, Email, Password fields
+
+### Login
+- Email and Password fields
+- Role badge displayed in navbar after login
+
+## 🔒 Security Features
+
+1. **Password Hashing**: Django's PBKDF2 with SHA256
+2. **CSRF Protection**: All forms include CSRF tokens
+3. **Session Security**: Secure session cookies
+4. **Permission Checks**: `@login_required` and custom `@admin_required` decorators
+5. **Input Validation**: Server-side form validation
+
+## 📦 Dependencies
+
+```
+Django>=5.0
+django-tailwind>=3.8.0
+django-widget-tweaks>=1.5.0
+Pillow>=10.0.0
+reportlab>=4.4.0
+```
+
+## 🧪 Testing the Application
+
+1. **Register as Admin**: Choose "Admin" role during registration
+2. **Create Products**: Add products with name, price, category, stock
+3. **Register as User**: Create another account with "User" role
+4. **Test Permissions**: Verify User cannot see Add/Edit/Delete buttons
+5. **Export PDF**: Download product reports as PDF
+
+## 📝 License
+
+This project is for educational purposes.
