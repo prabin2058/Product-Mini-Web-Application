@@ -30,6 +30,8 @@ A comprehensive Django web application demonstrating authentication, database op
 | **Search & Filtering** | ✅ Complete | Search by name/description, filter by category/status |
 | **Pagination** | ✅ Complete | Page numbers with navigation controls |
 | **Role-Based Access (Admin/User)** | ✅ Complete | Admins have full CRUD, Users have read-only access |
+| **REST API Endpoints** | ✅ Complete | Full CRUD API at `/api/products/` and `/api/categories/` |
+
 
 ## 🛠 Tech Stack
 
@@ -181,6 +183,115 @@ On the Product List page (`/dashboard/products/`):
 - **Category Filter**: Filter by product category
 - **Status Filter**: Filter by stock status (In Stock, Low Stock, Out of Stock)
 
+### REST API Endpoints
+
+The API is available at `/api/` with the following endpoints:
+
+#### Products API
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| GET | `/api/products/` | List all products | Yes |
+| POST | `/api/products/` | Create product | Admin only |
+| GET | `/api/products/{id}/` | Get single product | Yes |
+| PUT | `/api/products/{id}/` | Update product | Admin only |
+| DELETE | `/api/products/{id}/` | Delete product | Admin only |
+| GET | `/api/products/stats/` | Get product statistics | Yes |
+
+**Query Parameters for `/api/products/`:**
+- `?search=term` - Search by name/description
+- `?category=id` - Filter by category ID
+- `?status=in_stock|low_stock|out_of_stock` - Filter by status
+
+#### Categories API
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| GET | `/api/categories/` | List all categories | Yes |
+| POST | `/api/categories/` | Create category | Admin only |
+| GET | `/api/categories/{id}/` | Get single category | Yes |
+| PUT | `/api/categories/{id}/` | Update category | Admin only |
+| DELETE | `/api/categories/{id}/` | Delete category | Admin only |
+
+#### Testing the API
+
+1. Open **http://127.0.0.1:8000/api/** in your browser (login required)
+2. Use the browsable API interface to test endpoints
+3. Or use tools like **Postman** or **curl**
+
+## 🔧 API Implementation Explained
+
+### Architecture Overview
+
+The REST API is built using **Django REST Framework (DRF)** with the following components:
+
+```
+HTTP Request → URL Router → Permission Check → ViewSet → Serializer → JSON Response
+```
+
+### 1. Serializers (`dashboard/serializers.py`)
+
+Serializers convert Django models to JSON and validate incoming data:
+
+```python
+class ProductSerializer(serializers.ModelSerializer):
+    category_name = serializers.CharField(source='category.name', read_only=True)
+    
+    class Meta:
+        model = Product
+        fields = ['id', 'name', 'price', 'category', 'category_name', ...]
+```
+
+**Key Concepts:**
+- `ModelSerializer` - Auto-generates fields from model
+- `read_only=True` - Field only in output (GET), not input (POST)
+- `source='category.name'` - Gets data from related model
+
+### 2. ViewSets (`dashboard/api_views.py`)
+
+ViewSets handle all CRUD operations. DRF maps HTTP methods automatically:
+
+| HTTP Method | Action | Example URL |
+|-------------|--------|-------------|
+| GET | list | `/api/products/` |
+| POST | create | `/api/products/` |
+| GET | retrieve | `/api/products/1/` |
+| PUT | update | `/api/products/1/` |
+| DELETE | destroy | `/api/products/1/` |
+
+```python
+class ProductViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated, IsAdminOrReadOnly]
+    
+    def get_queryset(self):
+        return Product.objects.all()
+    
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user)
+```
+
+### 3. Custom Permissions
+
+```python
+class IsAdminOrReadOnly(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if request.method in permissions.SAFE_METHODS:  # GET, HEAD, OPTIONS
+            return True
+        return request.user.is_staff  # Only admin can POST, PUT, DELETE
+```
+
+### 4. URL Router (`products/urls.py`)
+
+```python
+router = DefaultRouter()
+router.register(r'products', ProductViewSet)
+router.register(r'categories', CategoryViewSet)
+
+urlpatterns = [
+    path('api/', include(router.urls)),
+]
+```
+
 ## 📸 Screenshots
 
 ### Dashboard (Admin View)
@@ -227,6 +338,4 @@ reportlab>=4.4.0
 4. **Test Permissions**: Verify User cannot see Add/Edit/Delete buttons
 5. **Export PDF**: Download product reports as PDF
 
-## 📝 License
 
-This project is for educational purposes.
